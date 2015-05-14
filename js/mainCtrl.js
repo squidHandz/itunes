@@ -9,7 +9,7 @@ app.controller('mainCtrl', function($scope, itunesService){
   $scope.gridOptions = { 
       data: 'songData',
       height: '110px',
-      sortInfo: {fields: ['Artist','Song','Collection','Type','CollectionPrice'], directions: ['asc']},
+      sortInfo: {fields: ['Song', 'Artist', 'Collection', 'Type'], directions: ['asc']},
       columnDefs: [
         {field: 'Play', displayName: 'Play', width: '40px', cellTemplate: '<div class="ngCellText" ng-class="col.colIndex()"><a href="{{row.getProperty(col.field)}}"><img src="http://www.icty.org/x/image/Miscellaneous/play_icon30x30.png"></a></div>'},
         {field: 'Artist', displayName: 'Artist'},
@@ -21,38 +21,28 @@ app.controller('mainCtrl', function($scope, itunesService){
   };
 
 
-  //If everything worked you should see a huge array of objects inside your console. That's great! But unfortunately that's not what ng-grid is expecting. What you need to do now
-  //is sort the data you got back to be an object in the following format.
-    /*
-      AlbumArt: "http://a3.mzstatic.com/us/r30/Features4/v4/22/be/30/22be305b-d988-4525-453c-7203af1dc5a3/dj.srlprmuo.100x100-75.jpg"
-      Artist: "Nelly"
-      Collection: "Nellyville"
-      CollectionPrice: 11.99
-      Play: "http://a423.phobos.apple.com/us/r1000/013/Music4/v4/4a/ab/7c/4aab7ce2-9a72-aa07-ac6b-2011b86b0042/mzaf_6553745548541009508.plus.aac.p.m4a"
-      Type: "song"
-  */
-  
-    var iParse = function(results){
-      $scope.songData = [];
-      var i = results.length;
-      while(i--){
-        var artistObj = {};
-        artistObj['AlbumArt'] = results[i].artworkUrl100;
-        artistObj['Artist'] = results[i].artistName;
-        artistObj['Collection'] = results[i].collectionName;
-        artistObj['CollectionPrice'] = results[i].collectionPrice;
-        artistObj['Play'] = results[i].previewUrl;
-        artistObj['Type'] = results[i].kind;
-        $scope.songData.push(artistObj);
-        i--;
+    function mapiData(results) {
+      return {
+        Artist: results.artistName,
+        AlbumArt: results.artworkUrl100,
+        Collection: results.collectionName,
+        CollectionPrice: results.collectionPrice,
+        Play: results.previewUrl,
+        Type: results.kind
       }
-    };
+    }
+
 
   $scope.getSongData = function(){
-    itunesService.iData($scope.artist).then(function(data){
-      iParse(data.data.results);
+    itunesService.getSongs($scope.artist).then(function(songs){
+      var correctedSongs = songs.map(mapiData)
+      $scope.songData = correctedSongs
     })
   };
+
+
+
+
 });
 
 
